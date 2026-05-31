@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>HelloAnto — Connexion</title>
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; background: #f5f0e8; font-family: sans-serif; }
+    .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; }
+    input { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+    button { width: 100%; padding: 10px; background: #1a1a2e; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Connexion</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="pass" placeholder="Mot de passe">
+    <button onclick="login()">Se connecter</button>
+    <p id="msg"></p>
+  </div>
+  <script>
+    function login() {
+      if(document.getElementById('email').value === 'antoinengn45@gmail.com' && 
+         document.getElementById('pass').value === 'antoine21') {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('msg').textContent = "Identifiants incorrects";
+      }
+    }
+  </script>
+</body>
+</html>
