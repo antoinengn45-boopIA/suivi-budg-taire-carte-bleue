@@ -6,20 +6,25 @@ fetch('data.json')
         let total = 0;
 
         data.forEach(item => {
-            total += item.montant;
-            
-            // Couleur selon si c'est une dépense ou un gain
-            const colorClass = item.montant < 0 ? 'text-red' : 'text-green';
+            // Logique de calcul
+            const montant = parseFloat(item.montant);
+            if (item.type === "Débité") {
+                total -= montant;
+            } else {
+                total += montant;
+            }
 
-            const row = `<tr>
-                <td>${item.date}</td>
-                <td>${item.description}</td>
-                <td class="${colorClass}">${item.montant.toFixed(2)} €</td>
-            </tr>`;
-            tableBody.innerHTML += row;
+            // Ajout ligne
+            const color = item.type === "Débité" ? "red" : "green";
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.description}</td>
+                    <td style="color: ${color}">${item.type}</td>
+                    <td>${montant.toFixed(2)} €</td>
+                </tr>`;
         });
 
-        totalElement.innerText = total.toFixed(2) + ' €';
-        totalElement.style.color = total < 0 ? 'red' : 'green';
-    })
-    .catch(error => console.error('Erreur de chargement:', error));
+        totalElement.innerText = total.toFixed(2) + " €";
+        totalElement.style.color = total < 0 ? "red" : "green";
+    });
