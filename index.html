@@ -2,11 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>HelloAnto - ma banque personnel en ligne</title>
+    <title>HelloAnto - ma banque personnelle en ligne</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Historique des Transactions</h1>
+    
     <table id="transaction-table">
         <thead>
             <tr>
@@ -15,8 +16,16 @@
                 <th>Montant (€)</th>
             </tr>
         </thead>
-        <tbody id="table-body"></tbody>
+        <tbody id="table-body">
+            </tbody>
+        <tfoot>
+            <tr id="total-row">
+                <td colspan="2"><strong>Solde Total</strong></td>
+                <td id="total-balance">0.00 €</td>
+            </tr>
+        </tfoot>
     </table>
+
     <script src="script.js"></script>
 </body>
 </html>
