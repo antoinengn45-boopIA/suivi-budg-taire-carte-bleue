@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelloAnto — Tableau de bord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1a2e;
+      --ink-light:  #4a4a6a;
+      --cream:      #f5f0e8;
+      --white:      #ffffff;
+      --gold:       #c9a84c;
+      --sage:       #4a7c59;
+      --sage-pale:  #eaf3ec;
+      --red:        #c0392b;
+      --red-pale:   #fdf0ee;
+      --border:     rgba(26,26,46,.10);
+      --radius:     8px;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(ellipse at 5% 95%, rgba(74,124,89,.10) 0%, transparent 45%),
+        radial-gradient(ellipse at 95% 5%, rgba(201,168,76,.08) 0%, transparent 45%);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      padding: 40px 24px 60px;
+    }
+
+    /* grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+      background-size: 180px; opacity: .5;
+    }
+
+    .wrapper { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 36px;
+      animation: rise .5s cubic-bezier(.22,1,.36,1) both;
+    }
+    .brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      letter-spacing: -.02em;
+      line-height: 1;
+    }
+    .brand em { font-style: italic; color: var(--sage); }
+
+    .date-badge {
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      background: rgba(255,255,255,.7);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 14px;
+    }
+
+    /* ── Summary cards ── */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+      animation: rise .55s .08s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      box-shadow: 0 2px 12px rgba(26,26,46,.05);
+    }
+    .card-label {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .card-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.7rem;
+      letter-spacing: -.01em;
+    }
+    .card-value.positive { color: var(--sage); }
+    .card-value.negative { color: var(--red); }
+
+    /* ── Table panel ── */
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 2px 20px rgba(26,26,46,.06);
+      overflow: hidden;
+      animation: rise .6s .14s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .panel-header {
+      padding: 20px 28px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      letter-spacing: -.01em;
+    }
+    .tx-count {
+      font-size: .8rem;
+      color: #aaa;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #aaa;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+      animation: rowIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+
+    td {
+      padding: 14px 20px;
+      font-size: .9rem;
+      vertical-align: middle;
+    }
+
+    .td-date { color: var(--ink-light); font-size: .83rem; white-space: nowrap; }
+    .td-desc { font-weight: 500; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+    .badge.debit  { background: var(--red-pale);  color: var(--red); }
+    .badge.credit { background: var(--sage-pale); color: var(--sage); }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .td-amount { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+    .td-amount.debit  { color: var(--red); }
+    .td-amount.credit { color: var(--sage); }
+
+    tfoot tr { background: #f8f8f8; border-top: 2px solid var(--border); }
+    tfoot td {
+      padding: 16px 20px;
+      font-size: .85rem;
+      font-weight: 500;
+    }
+    #total-label { color: var(--ink-light); letter-spacing: .04em; text-transform: uppercase; font-size: .75rem; }
+    #total-balance { text-align: right; font-family: 'DM Serif Display', serif; font-size: 1.35rem; }
+
+    @keyframes rise {
+      from { opacity:0; transform: translateY(18px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    @keyframes rowIn {
+      from { opacity:0; transform: translateX(-8px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="brand">Hello<em>Anto</em></div>
+    <div class="date-badge" id="today-date"></div>
+  </header>
+
+  <!-- Summary cards (filled by JS) -->
+  <div class="summary">
+    <div class="card">
+      <div class="card-label">Solde final</div>
+      <div class="card-value" id="summary-balance">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Débits</div>
+      <div class="card-value negative" id="summary-debits">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Crédits</div>
+      <div class="card-value positive" id="summary-credits">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Transactions</div>
+      <div class="card-value" id="summary-count">—</div>
+    </div>
+  </div>
+
+  <!-- Transactions table -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Transactions</span>
+      <span class="tx-count" id="tx-count"></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th style="text-align:right">Montant</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" id="total-label">Solde final</td>
+          <td id="total-balance">0,00 €</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // ── Données (remplace le fetch si tu veux charger depuis data.json) ──
+  const transactions = [
+    { "date": "2026-04-16", "description": "Victorine - Orléans",   "type": "Débité",  "montant": 11.80 },
+    { "date": "2026-04-25", "description": "Market Frais - Saran",   "type": "Débité",  "montant": 2.18  },
+    { "date": "2026-04-26", "description": "Patapain - Ormes",       "type": "Débité",  "montant": 4.80  },
+    { "date": "2026-05-09", "description": "Retrait en Banque",      "type": "Crédité", "montant": 51.05 },
+    { "date": "2026-05-30", "description": "Carrefour - Saran",      "type": "Débité",  "montant": 8.33  }
+  ];
+
+  // ── Date du jour ──
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // ── Rendu ──
+  const tbody   = document.getElementById('table-body');
+  const totalEl = document.getElementById('total-balance');
+  let total = 0, totalDebits = 0, totalCredits = 0;
+
+  const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' €';
+
+  const fmtDate = (iso) => {
+    const [y, m, d] = iso.split('-');
+    return new Date(y, m-1, d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+  };
+
+  transactions.forEach((item, i) => {
+    const isDebit = item.type === 'Débité';
+    const montant = parseFloat(item.montant);
+
+    if (isDebit) { total -= montant; totalDebits += montant; }
+    else         { total += montant; totalCredits += montant; }
+
+    const cls   = isDebit ? 'debit' : 'credit';
+    const label = isDebit ? 'Débité' : 'Crédité';
+    const sign  = isDebit ? '−' : '+';
+
+    const tr = document.createElement('tr');
+    tr.style.animationDelay = `${.05 + i * .06}s`;
+    tr.innerHTML = `
+      <td class="td-date">${fmtDate(item.date)}</td>
+      <td class="td-desc">${item.description}</td>
+      <td><span class="badge ${cls}">${label}</span></td>
+      <td class="td-amount ${cls}">${sign} ${fmt(montant)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Solde final
+  totalEl.textContent  = fmt(Math.abs(total));
+  totalEl.style.color  = total < 0 ? 'var(--red)' : 'var(--sage)';
+  if (total < 0) totalEl.textContent = '− ' + totalEl.textContent;
+
+  // Summary cards
+  document.getElementById('summary-balance').textContent = (total < 0 ? '− ' : '') + fmt(Math.abs(total));
+  document.getElementById('summary-balance').className   = 'card-value ' + (total < 0 ? 'negative' : 'positive');
+  document.getElementById('summary-debits').textContent  = '− ' + fmt(totalDebits);
+  document.getElementById('summary-credits').textContent = '+ ' + fmt(totalCredits);
+  document.getElementById('summary-count').textContent   = transactions.length;
+  document.getElementById('tx-count').textContent        = transactions.length + ' opération' + (transactions.length > 1 ? 's' : '');
+</script>
+</body>
+</html>
