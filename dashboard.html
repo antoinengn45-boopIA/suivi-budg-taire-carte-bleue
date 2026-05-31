@@ -4,37 +4,98 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HelloAnto — Tableau de bord</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ink:        #1a1a2e;
-      --ink-light:  #4a4a6a;
-      --cream:      #f5f0e8;
-      --white:      #ffffff;
-      --gold:       #c9a84c;
-      --sage:       #4a7c59;
-      --sage-pale:  #eaf3ec;
-      --red:        #c0392b;
-      --red-pale:   #fdf0ee;
-      --border:     rgba(26,26,46,.10);
-      --radius:     8px;
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <script>
+    // Sécurité : Redirection si non connecté
+    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'index.html';
     }
+  </script>
+</head>
+<body>
+<div class="wrapper">
 
-    body {
-      min-height: 100vh;
-      background-color: var(--cream);
-      background-image:
-        radial-gradient(ellipse at 5% 95%, rgba(74,124,89,.10) 0%, transparent 45%),
-        radial-gradient(ellipse at 95% 5%, rgba(201,168,76,.08) 0%, transparent 45%);
-      font-family: 'DM Sans', sans-serif;
-      color: var(--ink);
-      padding: 40px 24px 60px;
-    }
+  <header>
+    <div class="brand">Hello<em>Anto</em></div>
+    <div class="date-badge" id="today-date"></div>
+  </header>
 
-    /* grain */
+  <div class="summary">
+    <div class="card"><div class="card-label">Solde final</div><div class="card-value" id="summary-balance">—</div></div>
+    <div class="card"><div class="card-label">Débits</div><div class="card-value negative" id="summary-debits">—</div></div>
+    <div class="card"><div class="card-label">Crédits</div><div class="card-value positive" id="summary-credits">—</div></div>
+    <div class="card"><div class="card-label">Opérations</div><div class="card-value" id="summary-count">—</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Transactions</span>
+      <span class="tx-count" id="tx-count"></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th style="text-align:right">Montant</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" id="total-label">Solde final</td>
+          <td id="total-balance" style="text-align:right">0,00 €</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Chargement des données et rendu
+  fetch('data.json')
+    .then(response => response.json())
+    .then(transactions => {
+      const tbody = document.getElementById('table-body');
+      const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+      let total = 0, totalDebits = 0, totalCredits = 0;
+
+      document.getElementById('today-date').textContent = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+      transactions.forEach((item, i) => {
+        const isDebit = item.type === 'Débité';
+        const montant = parseFloat(item.montant);
+        if (isDebit) { total -= montant; totalDebits += montant; }
+        else { total += montant; totalCredits += montant; }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="td-date">${item.date}</td>
+          <td class="td-desc">${item.description}</td>
+          <td><span class="badge ${isDebit ? 'debit' : 'credit'}">${item.type}</span></td>
+          <td class="td-amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '−' : '+'} ${fmt(montant)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Mise à jour des éléments de résumé
+      document.getElementById('summary-balance').textContent = (total < 0 ? '− ' : '') + fmt(Math.abs(total));
+      document.getElementById('summary-debits').textContent = '− ' + fmt(totalDebits);
+      document.getElementById('summary-credits').textContent = '+ ' + fmt(totalCredits);
+      document.getElementById('summary-count').textContent = transactions.length;
+      document.getElementById('tx-count').textContent = transactions.length + ' opération(s)';
+      
+      const totalEl = document.getElementById('total-balance');
+      totalEl.textContent = fmt(Math.abs(total));
+      totalEl.style.color = total < 0 ? 'var(--red)' : 'var(--sage)';
+    })
+    .catch(err => console.error("Erreur chargement données:", err));
+</script>
+</body>
+</html>    /* grain */
     body::before {
       content: '';
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
