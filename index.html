@@ -2,30 +2,25 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>HelloAnto - ma banque personnelle en ligne</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Connexion - HelloAnto</title>
 </head>
 <body>
-    <h1>Historique des Transactions</h1>
-    
-    <table id="transaction-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Montant (€)</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            </tbody>
-        <tfoot>
-            <tr id="total-row">
-                <td colspan="2"><strong>Solde Total</strong></td>
-                <td id="total-balance">0.00 €</td>
-            </tr>
-        </tfoot>
-    </table>
+    <h2>Connexion à HelloAnto</h2>
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="pass" placeholder="Mot de passe"><br>
+    <button onclick="login()">Se connecter</button>
+    <p id="msg"></p>
 
-    <script src="script.js"></script>
+    <script>
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if(email === 'antoinengn45@gmail.com' && pass === 'antoine21') {
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('msg').innerText = "Identifiants incorrects";
+            }
+        }
+    </script>
 </body>
 </html>
