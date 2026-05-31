@@ -4,262 +4,206 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HelloAnto — Tableau de bord</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
   <script>
-    // Sécurité : Redirection si non connecté
     if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-      window.location.href = 'index.html';
+      // window.location.href = 'index.html';
     }
   </script>
-</head>
-<body>
-<div class="wrapper">
 
-  <header>
-    <div class="brand">Hello<em>Anto</em></div>
-    <div class="date-badge" id="today-date"></div>
-  </header>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <div class="summary">
-    <div class="card"><div class="card-label">Solde final</div><div class="card-value" id="summary-balance">—</div></div>
-    <div class="card"><div class="card-label">Débits</div><div class="card-value negative" id="summary-debits">—</div></div>
-    <div class="card"><div class="card-label">Crédits</div><div class="card-value positive" id="summary-credits">—</div></div>
-    <div class="card"><div class="card-label">Opérations</div><div class="card-value" id="summary-count">—</div></div>
-  </div>
+    :root {
+      --bg:         #0f0f11;
+      --surface:    #17171b;
+      --surface-2:  #1e1e24;
+      --border:     rgba(255,255,255,.07);
+      --border-h:   rgba(255,255,255,.13);
+      --text:       #e8e8f0;
+      --muted:      #6b6b80;
+      --gold:       #d4a843;
+      --red:        #e05c5c;
+      --red-pale:   rgba(224,92,92,.10);
+      --green:      #4caf7d;
+      --green-pale: rgba(76,175,125,.10);
+      --radius:     10px;
+    }
 
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Transactions</span>
-      <span class="tx-count" id="tx-count"></span>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Type</th>
-          <th style="text-align:right">Montant</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3" id="total-label">Solde final</td>
-          <td id="total-balance" style="text-align:right">0,00 €</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      padding: 40px 24px 80px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(212,168,67,.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(76,175,125,.05) 0%, transparent 55%);
+    }
 
-<script>
-  // Chargement des données et rendu
-  fetch('data.json')
-    .then(response => response.json())
-    .then(transactions => {
-      const tbody = document.getElementById('table-body');
-      const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-      let total = 0, totalDebits = 0, totalCredits = 0;
-
-      document.getElementById('today-date').textContent = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-
-      transactions.forEach((item, i) => {
-        const isDebit = item.type === 'Débité';
-        const montant = parseFloat(item.montant);
-        if (isDebit) { total -= montant; totalDebits += montant; }
-        else { total += montant; totalCredits += montant; }
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="td-date">${item.date}</td>
-          <td class="td-desc">${item.description}</td>
-          <td><span class="badge ${isDebit ? 'debit' : 'credit'}">${item.type}</span></td>
-          <td class="td-amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '−' : '+'} ${fmt(montant)}</td>
-        `;
-        tbody.appendChild(row);
-      });
-
-      // Mise à jour des éléments de résumé
-      document.getElementById('summary-balance').textContent = (total < 0 ? '− ' : '') + fmt(Math.abs(total));
-      document.getElementById('summary-debits').textContent = '− ' + fmt(totalDebits);
-      document.getElementById('summary-credits').textContent = '+ ' + fmt(totalCredits);
-      document.getElementById('summary-count').textContent = transactions.length;
-      document.getElementById('tx-count').textContent = transactions.length + ' opération(s)';
-      
-      const totalEl = document.getElementById('total-balance');
-      totalEl.textContent = fmt(Math.abs(total));
-      totalEl.style.color = total < 0 ? 'var(--red)' : 'var(--sage)';
-    })
-    .catch(err => console.error("Erreur chargement données:", err));
-</script>
-</body>
-</html>    /* grain */
-    body::before {
+    body::after {
       content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
-      background-size: 180px; opacity: .5;
+      position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+      background-size: 180px;
     }
 
-    .wrapper { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+    .wrapper { max-width: 900px; margin: 0 auto; }
 
-    /* ── Header ── */
+    /* HEADER */
     header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 36px;
-      animation: rise .5s cubic-bezier(.22,1,.36,1) both;
-    }
-    .brand {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2.2rem;
-      letter-spacing: -.02em;
-      line-height: 1;
-    }
-    .brand em { font-style: italic; color: var(--sage); }
-
-    .date-badge {
-      font-size: .78rem;
-      font-weight: 500;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: var(--ink-light);
-      background: rgba(255,255,255,.7);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      padding: 6px 14px;
-    }
-
-    /* ── Summary cards ── */
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-      animation: rise .55s .08s cubic-bezier(.22,1,.36,1) both;
-    }
-
-    .card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 22px 24px;
-      box-shadow: 0 2px 12px rgba(26,26,46,.05);
-    }
-    .card-label {
-      font-size: .72rem;
-      font-weight: 500;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #999;
-      margin-bottom: 8px;
-    }
-    .card-value {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.7rem;
-      letter-spacing: -.01em;
-    }
-    .card-value.positive { color: var(--sage); }
-    .card-value.negative { color: var(--red); }
-
-    /* ── Table panel ── */
-    .panel {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(26,26,46,.06);
-      overflow: hidden;
-      animation: rise .6s .14s cubic-bezier(.22,1,.36,1) both;
-    }
-
-    .panel-header {
-      padding: 20px 28px 18px;
-      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-    }
-    .panel-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.15rem;
-      letter-spacing: -.01em;
-    }
-    .tx-count {
-      font-size: .8rem;
-      color: #aaa;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 48px;
+      animation: fadeUp .5s cubic-bezier(.22,1,.36,1) both;
     }
 
+    .brand { font-size: 1.75rem; font-weight: 800; letter-spacing: -.03em; }
+    .brand em { font-style: normal; color: var(--gold); }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .date-pill {
+      font-size: .7rem; font-weight: 500; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 99px; padding: 7px 16px;
+    }
+
+    .logout-btn {
+      font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      background: none; border: 1px solid var(--border); border-radius: 99px;
+      padding: 7px 16px; cursor: pointer; transition: color .2s, border-color .2s;
+    }
+    .logout-btn:hover { color: var(--red); border-color: rgba(224,92,92,.3); }
+
+    /* KPI STRIP */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px; margin-bottom: 28px;
+      animation: fadeUp .5s .07s cubic-bezier(.22,1,.36,1) both;
+    }
+    @media (max-width: 640px) { .summary { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 20px 18px;
+      position: relative; overflow: hidden; transition: border-color .2s;
+    }
+    .kpi:hover { border-color: var(--border-h); }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; border-radius: 2px 2px 0 0;
+      background: var(--accent, var(--gold)); opacity: .6;
+    }
+    .kpi.k-debit  { --accent: var(--red); }
+    .kpi.k-credit { --accent: var(--green); }
+    .kpi.k-count  { --accent: var(--muted); }
+
+    .kpi-label {
+      font-size: .65rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+    }
+    .kpi-value {
+      font-family: 'IBM Plex Mono', monospace; font-size: 1.3rem;
+      font-weight: 500; white-space: nowrap;
+    }
+    .kpi-value.gold  { color: var(--gold); }
+    .kpi-value.red   { color: var(--red); }
+    .kpi-value.green { color: var(--green); }
+
+    /* PANEL */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      animation: fadeUp .5s .14s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .panel-header {
+      padding: 20px 28px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title {
+      font-size: .85rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .tx-pill {
+      font-size: .68rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 4px 12px;
+    }
+
+    /* TABLE */
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
-      padding: 12px 20px;
-      text-align: left;
-      font-size: .72rem;
-      font-weight: 500;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #aaa;
-      background: #fafafa;
-      border-bottom: 1px solid var(--border);
+      padding: 12px 24px; text-align: left;
+      font-size: .62rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
     }
+    thead th:last-child { text-align: right; }
 
     tbody tr {
       border-bottom: 1px solid var(--border);
       transition: background .15s;
-      animation: rowIn .4s cubic-bezier(.22,1,.36,1) both;
+      animation: rowSlide .35s cubic-bezier(.22,1,.36,1) both;
     }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #fafafa; }
+    tbody tr:hover { background: var(--surface-2); }
 
-    td {
-      padding: 14px 20px;
-      font-size: .9rem;
-      vertical-align: middle;
+    td { padding: 16px 24px; vertical-align: middle; }
+
+    .td-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .78rem; color: var(--muted); white-space: nowrap;
     }
-
-    .td-date { color: var(--ink-light); font-size: .83rem; white-space: nowrap; }
-    .td-desc { font-weight: 500; }
+    .td-desc { font-size: .88rem; font-weight: 600; }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 99px;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; padding: 4px 11px 4px 8px; border-radius: 6px;
     }
-    .badge.debit  { background: var(--red-pale);  color: var(--red); }
-    .badge.credit { background: var(--sage-pale); color: var(--sage); }
-    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .badge.debit  { background: var(--red-pale);   color: var(--red); }
+    .badge.debit  .badge-dot { background: var(--red); }
+    .badge.credit { background: var(--green-pale); color: var(--green); }
+    .badge.credit .badge-dot { background: var(--green); }
 
-    .td-amount { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+    .td-amount {
+      font-family: 'IBM Plex Mono', monospace; font-size: .9rem;
+      font-weight: 500; text-align: right; white-space: nowrap;
+    }
     .td-amount.debit  { color: var(--red); }
-    .td-amount.credit { color: var(--sage); }
+    .td-amount.credit { color: var(--green); }
 
-    tfoot tr { background: #f8f8f8; border-top: 2px solid var(--border); }
-    tfoot td {
-      padding: 16px 20px;
-      font-size: .85rem;
-      font-weight: 500;
+    tfoot tr { background: var(--surface-2); border-top: 1px solid var(--border-h); }
+    tfoot td { padding: 18px 24px; }
+    .tfoot-label {
+      font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
     }
-    #total-label { color: var(--ink-light); letter-spacing: .04em; text-transform: uppercase; font-size: .75rem; }
-    #total-balance { text-align: right; font-family: 'DM Serif Display', serif; font-size: 1.35rem; }
+    #total-balance {
+      font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem;
+      font-weight: 500; text-align: right;
+    }
 
-    @keyframes rise {
-      from { opacity:0; transform: translateY(18px); }
-      to   { opacity:1; transform: translateY(0); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes rowIn {
-      from { opacity:0; transform: translateX(-8px); }
-      to   { opacity:1; transform: translateX(0); }
+    @keyframes rowSlide {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
   </style>
 </head>
@@ -268,34 +212,35 @@
 
   <header>
     <div class="brand">Hello<em>Anto</em></div>
-    <div class="date-badge" id="today-date"></div>
+    <div class="header-right">
+      <div class="date-pill" id="today-date">—</div>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
   </header>
 
-  <!-- Summary cards (filled by JS) -->
   <div class="summary">
-    <div class="card">
-      <div class="card-label">Solde final</div>
-      <div class="card-value" id="summary-balance">—</div>
+    <div class="kpi k-balance">
+      <div class="kpi-label">Solde final</div>
+      <div class="kpi-value gold" id="summary-balance">—</div>
     </div>
-    <div class="card">
-      <div class="card-label">Débits</div>
-      <div class="card-value negative" id="summary-debits">—</div>
+    <div class="kpi k-debit">
+      <div class="kpi-label">Débits</div>
+      <div class="kpi-value red" id="summary-debits">—</div>
     </div>
-    <div class="card">
-      <div class="card-label">Crédits</div>
-      <div class="card-value positive" id="summary-credits">—</div>
+    <div class="kpi k-credit">
+      <div class="kpi-label">Crédits</div>
+      <div class="kpi-value green" id="summary-credits">—</div>
     </div>
-    <div class="card">
-      <div class="card-label">Transactions</div>
-      <div class="card-value" id="summary-count">—</div>
+    <div class="kpi k-count">
+      <div class="kpi-label">Opérations</div>
+      <div class="kpi-value" id="summary-count">—</div>
     </div>
   </div>
 
-  <!-- Transactions table -->
   <div class="panel">
     <div class="panel-header">
       <span class="panel-title">Transactions</span>
-      <span class="tx-count" id="tx-count"></span>
+      <span class="tx-pill" id="tx-count">—</span>
     </div>
     <table>
       <thead>
@@ -303,14 +248,14 @@
           <th>Date</th>
           <th>Description</th>
           <th>Type</th>
-          <th style="text-align:right">Montant</th>
+          <th>Montant</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
       <tfoot>
         <tr>
-          <td colspan="3" id="total-label">Solde final</td>
-          <td id="total-balance">0,00 €</td>
+          <td colspan="3" class="tfoot-label">Solde final</td>
+          <td id="total-balance">—</td>
         </tr>
       </tfoot>
     </table>
@@ -319,65 +264,66 @@
 </div>
 
 <script>
-  // ── Données (remplace le fetch si tu veux charger depuis data.json) ──
   const transactions = [
-    { "date": "2026-04-16", "description": "Victorine - Orléans",   "type": "Débité",  "montant": 11.80 },
-    { "date": "2026-04-25", "description": "Market Frais - Saran",   "type": "Débité",  "montant": 2.18  },
-    { "date": "2026-04-26", "description": "Patapain - Ormes",       "type": "Débité",  "montant": 4.80  },
-    { "date": "2026-05-09", "description": "Retrait en Banque",      "type": "Crédité", "montant": 51.05 },
-    { "date": "2026-05-30", "description": "Carrefour - Saran",      "type": "Débité",  "montant": 8.33  }
+    { date: "2026-04-16", description: "Victorine - Orléans",  type: "Débité",  montant: 11.80 },
+    { date: "2026-04-25", description: "Market Frais - Saran",  type: "Débité",  montant: 2.18  },
+    { date: "2026-04-26", description: "Patapain - Ormes",      type: "Débité",  montant: 4.80  },
+    { date: "2026-05-09", description: "Retrait en Banque",     type: "Crédité", montant: 51.05 },
+    { date: "2026-05-30", description: "Carrefour - Saran",     type: "Débité",  montant: 8.33  },
   ];
 
-  // ── Date du jour ──
-  document.getElementById('today-date').textContent =
-    new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const fmt = n =>
+    n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
-  // ── Rendu ──
-  const tbody   = document.getElementById('table-body');
-  const totalEl = document.getElementById('total-balance');
-  let total = 0, totalDebits = 0, totalCredits = 0;
-
-  const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' €';
-
-  const fmtDate = (iso) => {
+  const fmtDate = iso => {
     const [y, m, d] = iso.split('-');
-    return new Date(y, m-1, d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+    return new Date(y, m - 1, d)
+      .toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
   };
+
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+  const tbody = document.getElementById('table-body');
+  let total = 0, totalDebits = 0, totalCredits = 0;
 
   transactions.forEach((item, i) => {
     const isDebit = item.type === 'Débité';
     const montant = parseFloat(item.montant);
-
     if (isDebit) { total -= montant; totalDebits += montant; }
     else         { total += montant; totalCredits += montant; }
 
-    const cls   = isDebit ? 'debit' : 'credit';
-    const label = isDebit ? 'Débité' : 'Crédité';
-    const sign  = isDebit ? '−' : '+';
-
     const tr = document.createElement('tr');
-    tr.style.animationDelay = `${.05 + i * .06}s`;
+    tr.style.animationDelay = `${.18 + i * .07}s`;
     tr.innerHTML = `
       <td class="td-date">${fmtDate(item.date)}</td>
       <td class="td-desc">${item.description}</td>
-      <td><span class="badge ${cls}">${label}</span></td>
-      <td class="td-amount ${cls}">${sign} ${fmt(montant)}</td>
+      <td><span class="badge ${isDebit ? 'debit' : 'credit'}"><span class="badge-dot"></span>${item.type}</span></td>
+      <td class="td-amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '−' : '+'} ${fmt(montant)}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Solde final
-  totalEl.textContent  = fmt(Math.abs(total));
-  totalEl.style.color  = total < 0 ? 'var(--red)' : 'var(--sage)';
-  if (total < 0) totalEl.textContent = '− ' + totalEl.textContent;
+  const balEl = document.getElementById('summary-balance');
+  balEl.textContent = (total < 0 ? '− ' : '') + fmt(Math.abs(total));
+  balEl.className   = 'kpi-value ' + (total < 0 ? 'red' : 'gold');
 
-  // Summary cards
-  document.getElementById('summary-balance').textContent = (total < 0 ? '− ' : '') + fmt(Math.abs(total));
-  document.getElementById('summary-balance').className   = 'card-value ' + (total < 0 ? 'negative' : 'positive');
   document.getElementById('summary-debits').textContent  = '− ' + fmt(totalDebits);
   document.getElementById('summary-credits').textContent = '+ ' + fmt(totalCredits);
   document.getElementById('summary-count').textContent   = transactions.length;
-  document.getElementById('tx-count').textContent        = transactions.length + ' opération' + (transactions.length > 1 ? 's' : '');
+  document.getElementById('tx-count').textContent =
+    transactions.length + ' opération' + (transactions.length > 1 ? 's' : '');
+
+  const totalEl = document.getElementById('total-balance');
+  totalEl.textContent = (total < 0 ? '− ' : '+ ') + fmt(Math.abs(total));
+  totalEl.style.color = total < 0 ? 'var(--red)' : 'var(--green)';
+
+  function logout() {
+    sessionStorage.removeItem('isLoggedIn');
+    window.location.href = 'index.html';
+  }
 </script>
 </body>
 </html>
