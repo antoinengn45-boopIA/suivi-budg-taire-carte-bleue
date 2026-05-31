@@ -1,7 +1,7 @@
 [
-  { "date": "2026-04-16", "description": "Victorine - Orléans", "montant": 11.80 },
-  { "date": "2026-04-25", "description": "Market Frais - Saran", "montant": 2.18 },
-  { "date": "2026-04-26", "description": "Patapain - Ormes", "montant": 4.80 },
-  { "date": "2026-05-09", "description": "Retrait Historique en Banque - Ormes", "Solde": 51.05 },
-  { "date": "2026-05-30", "description": "Carrefour - Saran", "montant": 8.33 }
+  { "date": "2026-04-16", "description": "Victorine - Orléans", "montant": -11.80 },
+  { "date": "2026-04-25", "description": "Market Frais - Saran", "montant": -2.18 },
+  { "date": "2026-04-26", "description": "Patapain - Ormes", "montant": -4.80 },
+  { "date": "2026-05-09", "description": "Retrait en Banque - Ormes", "montant": 51.05 },
+  { "date": "2026-05-30", "description": "Carrefour - Saran", "montant": -8.33 }
 ]
