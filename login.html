@@ -157,7 +157,11 @@
       const pass  = document.getElementById('pass').value;
       const msg   = document.getElementById('msg');
 
-      if (email === 'antoinengn45@gmail.com' && pass === 'antoine21') {
+      // Vérification des deux comptes autorisés
+      const compte1 = (email === 'antoinengn45@gmail.com' && pass === 'antoine21');
+      const compte2 = (email === 'thingochan45140@gmail.com' && pass === 'han86');
+
+      if (compte1 || compte2) {
         msg.style.color = '#27ae60';
         msg.textContent = 'Connexion réussie…';
         setTimeout(() => window.location.href = 'dashboard.html', 600);
