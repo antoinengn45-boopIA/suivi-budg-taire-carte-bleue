@@ -157,23 +157,22 @@
       const pass  = document.getElementById('pass').value;
       const msg   = document.getElementById('msg');
 
-      // Vérification des deux comptes autorisés
-      const compte1 = (email === 'antoinengn45@gmail.com' && pass === 'antoine21');
-      const compte2 = (email === 'thingochan45140@gmail.com' && pass === 'han86');
+      console.log("Tentative pour : " + email); // Permet de voir dans la console si la fonction est appelée
 
-      if (compte1 || compte2) {
+      if ((email === 'antoinengn45@gmail.com' && pass === 'antoine21') || 
+          (email === 'thingochan45140@gmail.com' && pass === 'han86')) {
+        
         msg.style.color = '#27ae60';
         msg.textContent = 'Connexion réussie…';
+        // Vérifiez que dashboard.html existe bien au même endroit que ce fichier !
         setTimeout(() => window.location.href = 'dashboard.html', 600);
       } else {
         msg.style.color = 'var(--error)';
-        msg.textContent = 'Identifiants incorrects, veuillez réessayer.';
+        msg.textContent = 'Identifiants incorrects.';
         document.getElementById('pass').value = '';
-        document.getElementById('pass').focus();
       }
     }
 
-    // Connexion via la touche Entrée
     document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
   </script>
 </body>
